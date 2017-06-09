@@ -28,7 +28,7 @@ fi
 
 NUM_SAMPLES=`cat $bamlist | wc -l`
 echo -n "["
-test `tail -c1 NA12878trio` && NUM_SAMPLES=$((NUM_SAMPLES + 1))
+test `tail -c1 $bamlist` && NUM_SAMPLES=$((NUM_SAMPLES + 1))
 
 # Check which option to use
 if [[ $NUM_SAMPLES -le $SMALL_SAMPLE_SIZE ]]
