@@ -142,11 +142,11 @@ else
 
   # Genotyping-only iteration 1 (cleans graph)
   echo -n "|G" # Report genotyping iteration
-  $GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH \
+  $GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH "." \
     --no_new_variants\
     --output=$TMPR/it3\
     --sams=$TMPR/bamlist\
-    --log=$LOGFILE "." >/dev/null
+    --log=$LOGFILE >/dev/null
 
   ls $TMPR/it3/*.hap > $TMPR/haps3
   $GRAPHTYPER haplotypes $GRAPH \

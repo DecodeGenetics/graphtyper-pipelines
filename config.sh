@@ -29,6 +29,9 @@ PARALLEL=$(type -P parallel)
 
 
 # Directories #
+## Format of the temporary directory. Change this if you cannot use /tmp/
+TMP_FORMAT="/tmp/graphtyper_calling.XXXXXX"
+
 ## Top directory, you should probably not change this unless you know what you are doing
 TOP_DIR="$(realpath $(dirname ${BASH_SOURCE[0]}))"
 
@@ -91,13 +94,13 @@ fi
 
 
 # Check for problems#
-if [[ ! -f $GRAPHTYPER ]]; then echo "Graphtyper was not found (path '$GRAPHTYPER')."; exit 1; fi
-if [[ ! -f $VT ]]; then echo "VT was not found (path '$VT')."; exit 1; fi
-if [[ ! -f $TABIX ]]; then echo "Tabix was not found (path '$TABIX')."; exit 1; fi
-if [[ ! -f $SAMTOOLS ]]; then echo "SAMtools was not found (path '$SAMTOOLS')."; exit 1; fi
-if [[ ! -f $PARALLEL ]]; then echo "GNU parallel was not found (path '$PARALLEL')."; exit 1; fi
-if [[ ! -f $GENOME ]]; then echo "Reference genome was not found (path '$GENOME')."; exit 1; fi
-if [[ ! -f $VCF ]] && [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then echo "VCF was not found (path '$VCF')."; exit 1; fi
+if [[ ! -f $GRAPHTYPER ]]; then echo "Graphtyper was not found (GRAPHTYPER was to '$GRAPHTYPER')."; exit 1; fi
+if [[ ! -f $VT ]]; then echo "VT was not found (VT was set to '$VT')."; exit 1; fi
+if [[ ! -f $TABIX ]]; then echo "Tabix was not found (TABIX was set to '$TABIX')."; exit 1; fi
+if [[ ! -f $SAMTOOLS ]]; then echo "SAMtools was not found (SAMTOOLS was set to '$SAMTOOLS')."; exit 1; fi
+if [[ ! -f $PARALLEL ]]; then echo "GNU parallel was not found (PARALLEL was set to '$PARALLEL')."; exit 1; fi
+if [[ ! -f $GENOME ]]; then echo "Reference genome was not found (GENOME was set to '$GENOME')."; exit 1; fi
+if [[ ! -f $VCF ]] && [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then echo "VCF was not found (VCF was set to '$VCF')."; exit 1; fi
 
 # if the region size is not dividable by the slice size we need to make it larger
 rem=$((REGION_SIZE % SLICE_SIZE))

@@ -31,7 +31,7 @@ region_id=`printf "%09d" $start`"-"`printf "%09d" $end`
 start_time=$(date +%s)
 
 # Create a temporary directories
-TMP=$(mktemp --directory /tmp/graphtyper_calling.XXXXXX)
+TMP=$(mktemp --directory ${TMP_FORMAT})
 echo "Hostname:
 $(hostname | cut -d"." -f1)
 
@@ -44,7 +44,7 @@ ${chrom}:${start}-${end}
 Date:
 $(date)
 
-Start time (UNIX):
+Start time (UNIX seconds):
 $start_time"
 
 mkdir -p $TMP/results/${chrom}
