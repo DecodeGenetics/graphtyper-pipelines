@@ -6,7 +6,7 @@ This repository has the recommended pipeline scripts to use for Graphtyper. The 
  - tabix
  - vt ( https://github.com/atks/vt )
 
-The pipeline scripts will automatically search for these tools in your PATH directories, but you can also specify their paths by changing the `config.sh` file or create your own `my_config.sh` file. You can also set various parameters in the configuration files (which are documented there).
+The pipeline scripts will automatically search for these tools in your PATH directories, but you can also specify their paths by changing the `config.sh` file or create your own `my_config.sh` file. You can also set various variables/parameters in the configuration files (which are documented there). The only required variable is the `GENOME` variable, which you must set to your reference genome FASTA file.
 
 ## Usage
 ### Short version
