@@ -116,7 +116,8 @@ Flag meaning:
  - |: Iteration separator."
 
 # Paralize the call script
-$PARALLEL --jobs=$NUM_SLICES_RUNNING --halt=now,fail=1 $TMP/call_script.sh\
+$PARALLEL --jobs=$NUM_SLICES_RUNNING --halt=now,fail=1 bash\
+  ::: $TMP/call_script.sh\
   ::: $TMP/config.sh\
   ::: $TMP/local_bamlist\
   ::: $(echo ${regions[*]})
