@@ -74,10 +74,10 @@ GRAPHTYPER_THREADS=1
 SMALL_SAMPLE_SIZE=2
 
 ## Graphtyper call options for small sample sizes
-GRAPHTYPER_SMALL_SAMPLE_SIZE_OPTS="--threads=${THREADS_PER_SLICE} --minimum_variant_support=3 --minimum_variant_support_ratio=0.15"
+GRAPHTYPER_SMALL_SAMPLE_SIZE_OPTS="--threads=${GRAPHTYPER_THREADS} --minimum_variant_support=3 --minimum_variant_support_ratio=0.15"
 
 ## Graphtyper call options for large sample sizes
-GRAPHTYPER_POPULATION_OPTS="--threads=${THREADS_PER_SLICE} --minimum_variant_support=4 --minimum_variant_support_ratio=0.18"
+GRAPHTYPER_POPULATION_OPTS="--threads=${GRAPHTYPER_THREADS} --minimum_variant_support=4 --minimum_variant_support_ratio=0.18"
 
 ## Number of bases in each slice.
 SLICE_SIZE=5000
