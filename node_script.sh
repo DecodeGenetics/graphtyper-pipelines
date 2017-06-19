@@ -38,6 +38,9 @@ $(hostname | cut -d"." -f1)
 Temporary directory:
 $TMP
 
+Graphtyper binary:
+$(realpath ${GRAPHTYPER})
+
 Genotyping region:
 ${chrom}:${start}-${end}
 
