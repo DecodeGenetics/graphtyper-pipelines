@@ -36,7 +36,7 @@ The pipeline automatically detects which VCF files are missing from the results 
 bash make_graphtyper_pipeline.sh <BAM>
 ```
 
-to get the commands to run only failed regions. If no commands are outputted, it means all runs have completed.
+to get the commands to run only failed regions. If no commands are outputted, it means all runs have completed. If your runs fail becaue of memory, we recommend decreasing the `NUM_SLICES_RUNNING` variable to reduce the memory requirement without having any effect on quality.
 
 # License
 GNU GPLv3
