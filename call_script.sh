@@ -48,7 +48,7 @@ padded_region="${chrom}:$((i<=PAD_SIZE?1:i-PAD_SIZE))-$((i - 1 + SLICE_SIZE + PA
 
 if [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then
   $VT view -i $padded_region -o $TMPR/region.vcf.gz $VCF
-  $TABIX --force $TMPR/region.vcf.gz
+  $TABIX -f $TMPR/region.vcf.gz
 fi
 
 for bamfile in `cat $bamlist`
@@ -130,7 +130,7 @@ else
 
     $VT uniq -o $TMPR/new2.vcf $TMPR/new_region_sorted2.vcf.gz 2> $VT_LOG
     cat $TMPR/new2.vcf | bgzip -c > $TMPR/new_region2.vcf.gz
-    $TABIX --force $TMPR/new_region2.vcf.gz
+    $TABIX -f $TMPR/new_region2.vcf.gz
 
     # Clear graph
     rm --force ${GRAPH}
