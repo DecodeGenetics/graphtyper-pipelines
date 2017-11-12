@@ -38,5 +38,14 @@ bash make_graphtyper_pipeline.sh <BAM>
 
 to get the commands to run only failed regions. If no commands are outputted, it means all runs have completed. If your runs fail becaue of memory, we recommend decreasing the `NUM_SLICES_RUNNING` variable to reduce the memory requirement without having any effect on quality.
 
+## Example
+A test example config can be found in `test_config.sh`. You can run the test with:
+
+```sh
+make test
+```
+
+If everything is configured properly the test results should appear in `test/results/20/000000500-000009499.vcf.gz`. That output should be the same as in `test/expected.vcf.gz`.
+
 # License
 GNU GPLv3
