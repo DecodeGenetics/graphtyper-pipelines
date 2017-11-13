@@ -81,7 +81,7 @@ do
 done > $TMP/local_bamlist
 
 # Copy BAM files to a local directory
-$PARALLEL --jobs=${NUM_THREADS} --link $SAMTOOLS\
+$PARALLEL --jobs=${NUM_THREADS} --xapply $SAMTOOLS\
   ::: view\
   ::: -o\
   :::: $TMP/local_bamlist\
