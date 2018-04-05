@@ -80,7 +80,7 @@ GRAPHTYPER_SMALL_SAMPLE_SIZE_OPTS="--threads=${GRAPHTYPER_THREADS} --minimum_var
 GRAPHTYPER_POPULATION_OPTS="--threads=${GRAPHTYPER_THREADS} --minimum_variant_support=4 --minimum_variant_support_ratio=0.18"
 
 ## Number of bases in each slice.
-SLICE_SIZE=5000
+SLICE_SIZE=50000
 
 ## Number of bases padded around slicess
 PAD_SIZE=200
