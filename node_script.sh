@@ -137,7 +137,9 @@ $((genotyping_time - start_time))
 "
 
 # Concatenate all VCF files
-$VT cat $TMP/results/${chrom}/*.vcf.gz \
+find $TMP/results/${chrom}/ -name "*.vcf.gz" -type f | sort > $TMP/output_files
+
+$VT cat -L $TMP/output_files \
   | $VT sort -o $TMP/final.vcf.gz -m local -w 200 -
 
 $TABIX $TMP/final.vcf.gz
