@@ -81,19 +81,13 @@ do
 done > $TMP/local_bamlist
 
 # Copy BAM files to a local directory
-$PARALLEL --jobs=${NUM_THREADS} --xapply $SAMTOOLS\
-  ::: view\
-  ::: -o\
+$PARALLEL --jobs=${NUM_THREADS} --xapply $SAMTOOLS view -o {1} -b {2} "${chrom}:${start_padded}-${end_padded}"\
   :::: $TMP/local_bamlist\
-  ::: -b\
-  :::: $TMP/global_bamlist\
-  ::: "${chrom}:${start_padded}-${end_padded}"
+  :::: $TMP/global_bamlist
 
 
 # Index BAM files
-$PARALLEL --jobs=${NUM_THREADS} $SAMTOOLS\
-  ::: index\
-  :::: $TMP/local_bamlist
+$PARALLEL --jobs=${NUM_THREADS} $SAMTOOLS index :::: $TMP/local_bamlist
 
 # Get wall-clock time of copying files to local disk
 copy_files_time=$(date +%s)
@@ -119,10 +113,7 @@ Flag meaning:
  - |: Iteration separator."
 
 # Paralize the call script
-$PARALLEL --jobs=$NUM_SLICES_RUNNING --halt=now,fail=1 bash\
-  ::: $TMP/call_script.sh\
-  ::: $TMP/config.sh\
-  ::: $TMP/local_bamlist\
+$PARALLEL --jobs=$NUM_SLICES_RUNNING --halt=now,fail=1 bash $TMP/call_script.sh $TMP/config.sh $TMP/local_bamlist\
   ::: $(echo ${regions[*]})
 
 # Get wall-clock time of genotyping
@@ -137,11 +128,7 @@ $((genotyping_time - start_time))
 "
 
 # Concatenate all VCF files
-find $TMP/results/${chrom}/ -name "*.vcf.gz" -type f | sort > $TMP/output_files
-
-$VT cat -L $TMP/output_files \
-  | $VT sort -o $TMP/final.vcf.gz -m local -w 200 -
-
+$GRAPHTYPER vcf_concatenate $TMP/results/${chrom}/*.vcf.gz --no_sort --output=$TMP/final.vcf.gz
 $TABIX $TMP/final.vcf.gz
 
 # Move final results
@@ -155,7 +142,7 @@ then
   echo "
 WARNING: The output file already exists '${RESULTS}/${chrom}/${region_id}.vcf.gz'.
          The old file will be moved to '${RESULTS}/${chrom}/${region_id}.vcf.gz.bak'.
-"
+" 1>&2
   mv --force ${RESULTS}/${chrom}/${region_id}.vcf.gz ${RESULTS}/${chrom}/${region_id}.vcf.gz.bak
   mv --force ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi.bak
 fi

@@ -15,9 +15,6 @@ VCF=
 ## graphtyper binary, e.g. /usr/bin/graphtyper
 GRAPHTYPER=$(type -P graphtyper)
 
-## vt binary (https://github.com/atks/vt), e.g. /usr/bin/vt
-VT=$(type -P vt)
-
 ## tabix binary, e.g. /usr/bin/tabix
 TABIX=$(type -P tabix)
 
@@ -95,7 +92,6 @@ fi
 
 # Check for problems#
 if [[ ! -f $GRAPHTYPER ]]; then echo "Graphtyper was not found (GRAPHTYPER was to '$GRAPHTYPER')."; exit 1; fi
-if [[ ! -f $VT ]]; then echo "VT was not found (VT was set to '$VT')."; exit 1; fi
 if [[ ! -f $TABIX ]]; then echo "Tabix was not found (TABIX was set to '$TABIX')."; exit 1; fi
 if [[ ! -f $SAMTOOLS ]]; then echo "SAMtools was not found (SAMTOOLS was set to '$SAMTOOLS')."; exit 1; fi
 if [[ ! -f $PARALLEL ]]; then echo "GNU parallel was not found (PARALLEL was set to '$PARALLEL')."; exit 1; fi

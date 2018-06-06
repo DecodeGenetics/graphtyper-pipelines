@@ -4,7 +4,6 @@ This repository has the recommended pipeline scripts to use for Graphtyper. The 
  - GNU parallel
  - samtools
  - tabix
- - vt ( https://github.com/atks/vt ). Note: vt git hash `6686b5c` is known to work but more recent versions might not (See issue [#3](https://github.com/DecodeGenetics/graphtyper-pipelines/issues/3)).
 
 The pipeline scripts will automatically search for these tools in your PATH directories, but you can also specify their paths by changing the `config.sh` file or create your own `my_config.sh` file. You can also set various variables/parameters in the configuration files (which are documented there). The only required variable is the `GENOME` variable, which you must set to your reference genome FASTA file.
 
