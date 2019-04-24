@@ -1,16 +1,15 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+
 set -e
 set -o pipefail
 
 CONFIG=$1
 bam=$2 # E.g. /nfs/data/.../PN.bam
-bambai=${bam}.bai
 region=$3 # E.g. chr21:10000
 
 # Parse region
 chrom=`echo $region | cut -d":" -f1`
 start=`echo $region | cut -d":" -f2`
-i=$start
 
 # Load config
 source $CONFIG
@@ -21,8 +20,11 @@ CHROM_SIZE=`grep -w "^${chrom}" $GENOME.fai | cut -f2`
 end=$((end>CHROM_SIZE?CHROM_SIZE:end))
 
 # Pad region
-start_padded=$((i - PAD_SIZE < 1 ? 1 : i - PAD_SIZE))
+start_padded=$((start - PAD_SIZE < 1 ? 1 : start - PAD_SIZE))
 end_padded=$((end + PAD_SIZE > CHROM_SIZE ? CHROM_SIZE : end + PAD_SIZE))
+
+UNPADDED_REGION="${chrom}:${start}-${end}"
+PADDED_REGION="${chrom}:${start_padded}-${end_padded}"
 
 # Get ID for the region
 region_id=`printf "%09d" $start`"-"`printf "%09d" $end`
@@ -42,21 +44,21 @@ Graphtyper binary:
 $(realpath ${GRAPHTYPER})
 
 Genotyping region:
-${chrom}:${start}-${end}
+${UNPADDED_REGION}
 
 Date:
-$(date)
+$(date)"
 
-Start time (UNIX seconds):
-$start_time"
+mkdir --parents $TMP/results/${chrom} $TMP/haps/${chrom} $TMP/bams
 
-mkdir -p $TMP/results/${chrom}
-mkdir -p $TMP/bams
+# Clean up temporary directory on failures
+trap cleanup 1 2 3 6 15
 
-# Clean up temporary directory
-if [[ $CLEAN_UP -ne 0 ]]; then
-  trap "rm -r --force $TMP; exit " 0 1 2 15
-fi
+cleanup()
+{
+  rm -r --force $TMP
+  exit 1
+}
 
 # Copy files to local directory to reduce I/O
 cp $CONFIG $TMP/config.sh
@@ -75,19 +77,39 @@ else
   cp $bam $TMP/global_bamlist
 fi
 
-for bamfile in `cat $TMP/global_bamlist`
-do
+while IFS=$'\t' read bamfile cov; do
   echo $TMP/bams/$(basename $bamfile)
-done > $TMP/local_bamlist
+done < $TMP/global_bamlist > $TMP/local_bamlist
 
 # Copy BAM files to a local directory
-$PARALLEL --jobs=${NUM_THREADS} --xapply $SAMTOOLS view -o {1} -b {2} "${chrom}:${start_padded}-${end_padded}"\
-  :::: $TMP/local_bamlist\
-  :::: $TMP/global_bamlist
+if [[ ! -z $BAMSHRINK ]]
+then
+  echo ${chrom}$'\t'${start}$'\t'${end} > $TMP/region_file
 
+  while IFS=$'\t' read bam cov; do
+    if [[ -z $cov ]]; then
+      echo "WARNING: Found a BAM with no avgCovByReadLen calculated. Pre-calculating it is more efficient." >&2
+      cov=`$SAMTOOLS idxstats ${bam} | head -n -1 | awk '{sum+=$3+$4; ref+=$2;} END{print sum/ref}'`
+    fi
+
+    echo ${cov}
+  done < $TMP/global_bamlist > $TMP/global_coverage
+
+  cut -f1 $TMP/global_bamlist > $TMP/global_bamlist2
+  mv --force $TMP/global_bamlist2 $TMP/global_bamlist
+
+  $PARALLEL --halt=now,fail=1 --jobs=${NUM_THREADS} --xapply "${BAMSHRINK} {2} {1} 1000 Y 45 {3} {2}.bai $TMP/region_file"\
+    :::: $TMP/local_bamlist\
+    :::: $TMP/global_bamlist\
+    :::: $TMP/global_coverage
+else
+  $PARALLEL --halt=now,fail=1 --jobs=${NUM_THREADS} --xapply $SAMTOOLS view -o {1} -b {2} "${chrom}:${start_padded}-${end_padded}"\
+    :::: $TMP/local_bamlist\
+    :::: $TMP/global_bamlist
+fi
 
 # Index BAM files
-$PARALLEL --jobs=${NUM_THREADS} $SAMTOOLS index :::: $TMP/local_bamlist
+$PARALLEL --jobs=${NUM_THREADS} $SAMTOOLS index {1} :::: $TMP/local_bamlist
 
 # Get wall-clock time of copying files to local disk
 copy_files_time=$(date +%s)
@@ -98,6 +120,8 @@ $((copy_files_time - start_time))"
 
 # Create an array with all regions
 regions=()
+
+i=$start
 
 while [[ i -lt $end ]]
 do
@@ -113,45 +137,52 @@ Flag meaning:
  - |: Iteration separator."
 
 # Paralize the call script
-$PARALLEL --jobs=$NUM_SLICES_RUNNING --halt=now,fail=1 bash $TMP/call_script.sh $TMP/config.sh $TMP/local_bamlist\
+$PARALLEL --jobs=${NUM_SLICES_RUNNING} --halt=now,fail=1 bash $TMP/call_script.sh $TMP/config.sh $TMP/local_bamlist\
   ::: $(echo ${regions[*]})
 
 # Get wall-clock time of genotyping
 genotyping_time=$(date +%s)
 
+# Make sure the results directory exists
+mkdir --parents results/${chrom}/ haps/${chrom}
+
+# Concatenate all VCF files
+$GRAPHTYPER vcf_concatenate $TMP/results/${chrom}/*.vcf.gz --no_sort --output=$TMP/final_small_variants.vcf.gz
+$TABIX $TMP/final_small_variants.vcf.gz
+$GRAPHTYPER vcf_concatenate $TMP/haps/${chrom}/*.vcf.gz --no_sort --output=$TMP/final_haps.vcf.gz
+$TABIX $TMP/final_haps.vcf.gz
+
+mv $TMP/final_small_variants.vcf.gz results/${chrom}/${region_id}.vcf.gz
+mv $TMP/final_small_variants.vcf.gz.tbi results/${chrom}/${region_id}.vcf.gz.tbi
+mv $TMP/final_haps.vcf.gz haps/${chrom}/${region_id}.vcf.gz
+mv $TMP/final_haps.vcf.gz.tbi haps/${chrom}/${region_id}.vcf.gz.tbi
+
+## Check if this region was already been genotyped
+#if [[ -f "results/${chrom}/${region_id}.vcf.gz" ]]
+#then
+#  echo "
+#WARNING: The output file already exists 'results/${chrom}/${region_id}.vcf.gz'.
+#         The old file will be moved to 'results/${chrom}/${region_id}.vcf.gz.bak'.
+#" 1>&2
+#  mv --force results/${chrom}/${region_id}.vcf.gz results/${chrom}/${region_id}.vcf.gz.bak
+#  mv --force results/${chrom}/${region_id}.vcf.gz.tbi results/${chrom}/${region_id}.vcf.gz.tbi.bak
+#fi
+#
+#mv results/${chrom}/${region_id}.vcf.gz.tmp results/${chrom}/${region_id}.vcf.gz
+#mv results/${chrom}/${region_id}.vcf.gz.tbi.tmp results/${chrom}/${region_id}.vcf.gz.tbi
+
+# Clean up
+if [[ $CLEAN_UP -eq 1 ]]; then
+  rm -r --force $TMP
+fi
+
 echo "
+Graphtyper finished genotyping the region successfully. Final results are at:
+results/${chrom}/${region_id}.vcf.gz
+
 Total wall-clock time of genotyping with Graphtyper (seconds):
 $((genotyping_time - copy_files_time))
 
 Total time (seconds):
 $((genotyping_time - start_time))
-"
-
-# Concatenate all VCF files
-$GRAPHTYPER vcf_concatenate $TMP/results/${chrom}/*.vcf.gz --no_sort --output=$TMP/final.vcf.gz
-$TABIX $TMP/final.vcf.gz
-
-# Move final results
-mkdir -p ${RESULTS}/${chrom}
-mv $TMP/final.vcf.gz ${RESULTS}/${chrom}/${region_id}.vcf.gz.tmp
-mv $TMP/final.vcf.gz.tbi ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi.tmp
-
-# Check if this region was already been genotyped
-if [[ -f "${RESULTS}/${chrom}/${region_id}.vcf.gz" ]]
-then
-  echo "
-WARNING: The output file already exists '${RESULTS}/${chrom}/${region_id}.vcf.gz'.
-         The old file will be moved to '${RESULTS}/${chrom}/${region_id}.vcf.gz.bak'.
-" 1>&2
-  mv --force ${RESULTS}/${chrom}/${region_id}.vcf.gz ${RESULTS}/${chrom}/${region_id}.vcf.gz.bak
-  mv --force ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi.bak
-fi
-
-
-mv ${RESULTS}/${chrom}/${region_id}.vcf.gz.tmp ${RESULTS}/${chrom}/${region_id}.vcf.gz
-mv ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi.tmp ${RESULTS}/${chrom}/${region_id}.vcf.gz.tbi
-
-echo "
-Graphtyper finished genotyping the region successfully. Final results are at:
-${RESULTS}/${chrom}/${region_id}.vcf.gz
 "

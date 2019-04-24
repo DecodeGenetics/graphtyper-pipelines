@@ -15,98 +15,81 @@ region_id=`printf "%09d" $i`"-"`printf "%09d" $((i - 1 + SLICE_SIZE))`
 
 TMPR="$TMP/${chrom}/${region_id}"
 
-mkdir -p $TMPR/bams
-mkdir -p $TMPR/it1
-mkdir -p $TMPR/it2
-mkdir -p $TMPR/it3
-mkdir -p $TMPR/it4
+mkdir --parents $TMPR/bams $TMPR/it{1,2,3,4,5}
 
 # Clean up after calling
 if [[ $CLEAN_UP -ne 0 ]]; then
-  trap "rm -r -f $TMPR; exit " 0 1 2 15
+  trap "rm -r -f $TMPR; exit 1" 1 2 15
 fi
 
 NUM_SAMPLES=`cat $bamlist | wc -l`
 echo -n "["
 test `tail -c1 $bamlist` && NUM_SAMPLES=$((NUM_SAMPLES + 1))
 
-# Check which option to use
-if [[ $NUM_SAMPLES -le $SMALL_SAMPLE_SIZE ]]
-then
-  GRAPHTYPER_COMMON_OPTS=$GRAPHTYPER_SMALL_SAMPLE_SIZE_OPTS
-else
-  GRAPHTYPER_COMMON_OPTS=$GRAPHTYPER_POPULATION_OPTS
-fi
-
 # Graphtyper settings
 GRAPH=$TMPR/graph
 VT_LOG=$TMPR/vt_log
 GT_LOG=$TMPR/gt_log
 
-unpadded_region="${chrom}:${i}-$((i - 1 + SLICE_SIZE))"
-padded_region="${chrom}:$((i<=PAD_SIZE?1:i-PAD_SIZE))-$((i - 1 + SLICE_SIZE + PAD_SIZE))"
+UNPADDED_REGION="${chrom}:${i}-$((i - 1 + SLICE_SIZE))"
+PADDED_REGION="${chrom}:$((i<=PAD_SIZE?1:i-PAD_SIZE))-$((i - 1 + SLICE_SIZE + PAD_SIZE))"
 
-if [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then
-  bcftools view --output-file $TMPR/region.vcf.gz -Oz $VCF $padded_region
+if [[ ! -z  $VCF ]]; then
+  bcftools view --output-file $TMPR/region.vcf.gz -Oz $VCF $PADDED_REGION
   $TABIX -f $TMPR/region.vcf.gz
 fi
 
-for bamfile in `cat $bamlist`
-do
-  $SAMTOOLS view -b -o $TMPR/bams/$(basename $bamfile) $bamfile $padded_region
-done
+while read bamfile; do
+  $SAMTOOLS view -b -o $TMPR/bams/$(basename $bamfile) $bamfile $PADDED_REGION
+done < $bamlist
 
 find $TMPR/bams/ -name "*.bam" | sort > $TMPR/bamlist # Get bamlist for this region
+
+# Increase padded region by read length for graphs
+PAD_SIZE=$((PAD_SIZE + 151))
+PADDED_REGION="${chrom}:$((i<=PAD_SIZE?1:i-PAD_SIZE))-$((i - 1 + SLICE_SIZE + PAD_SIZE))"
 
 ##
 # Iteration 1
 ##
-if [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then
-  echo -n "V" # Report that the graph was initialized with a VCF file
-  $GRAPHTYPER construct $GRAPH $GENOME $padded_region --vcf=$TMPR/region.vcf.gz
-else
-  $GRAPHTYPER construct $GRAPH $GENOME $padded_region
-fi
-
 mkdir --parents $TMPR/it1
 
+$GRAPHTYPER construct $GRAPH $GENOME $PADDED_REGION
 $GRAPHTYPER index $GRAPH
 echo -n "D" # Report discovery iteration
-$GRAPHTYPER discover $GRAPH $padded_region \
+$GRAPHTYPER discover $GRAPH $PADDED_REGION \
   --output=$TMPR/it1\
-  --sams=$TMPR/bamlist > $GT_LOG
+  --sams=$TMPR/bamlist\
+  --minimum_variant_support=4\
+  --minimum_variant_support_ratio=0.25 > $GT_LOG
 
 find $TMPR/it1 -name "*_variant_map" -type f | sort > $TMPR/it1/all_variant_maps
 $GRAPHTYPER discovery_vcf $GRAPH $TMPR/it1/all_variant_maps --output=$TMPR/discovery.vcf.gz
 
-num_var_before=0
-
-if [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then
-  num_var_before=`zcat $TMPR/region.vcf.gz | grep -v '^#' | wc -l || true`
-  $GRAPHTYPER vcf_concatenate $TMPR/region.vcf.gz $TMPR/discovery.vcf.gz --output=$TMPR/it1/new.vcf.gz
+if [[ ! -z $VCF ]]; then
+  echo -n "V" # Report that the graph was initialized with a VCF file
+  $GRAPHTYPER vcf_concatenate --sites_only $TMPR/region.vcf.gz $TMPR/discovery.vcf.gz --output=$TMPR/it1/new.vcf.gz
 else
   mv $TMPR/discovery.vcf.gz $TMPR/it1/new.vcf.gz
 fi
 
 $TABIX $TMPR/it1/new.vcf.gz
 
-num_var_after=`zgrep -v "^#" $TMPR/it1/new.vcf.gz | wc -l || true`
-
 # Clear graph
-rm --force ${GRAPH}
-rm -r --force ${GRAPH}_gti/
+rm --recursive --force ${GRAPH} ${GRAPH}_gti/
 
 ##
 # Iteration 2
 ##
-$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it1/new.vcf.gz $padded_region
+$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it1/new.vcf.gz $PADDED_REGION
 $GRAPHTYPER index $GRAPH
 
-# Add second discovery iteration when calling a large sample size
 echo -n "|D" # Report discovery iteration
 $GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH "." \
+  --threads=${GRAPHTYPER_THREADS}\
   --output=$TMPR/it2\
   --sams=$TMPR/bamlist > $GT_LOG
+
 
 find $TMPR/it2/ -name "*.hap" | sort > $TMPR/haps2
 $GRAPHTYPER haplotypes $GRAPH \
@@ -115,22 +98,22 @@ $GRAPHTYPER haplotypes $GRAPH \
 
 find $TMPR/it2/ -name "*_variant_map" -type f | sort > $TMPR/it2/all_variant_maps
 $GRAPHTYPER discovery_vcf $GRAPH $TMPR/it2/all_variant_maps --output=$TMPR/it2/discovery.vcf.gz
-$GRAPHTYPER vcf_concatenate $TMPR/it2/haps.vcf.gz $TMPR/it2/discovery.vcf.gz --output=$TMPR/it2/new.vcf.gz
+$GRAPHTYPER vcf_concatenate --sites_only $TMPR/it2/haps.vcf.gz $TMPR/it2/discovery.vcf.gz --output=$TMPR/it2/new.vcf.gz
 $TABIX $TMPR/it2/new.vcf.gz
 
-# Clear graph
-rm --recursive --force ${GRAPH}
-rm -r --force ${GRAPH}_gti/
+# Clear graph and index
+rm -r --force ${GRAPH} ${GRAPH}_gti/
 
 ##
 # Iteration 3
 # Genotyping-only iteration 1 (cleans graph)
 ##
-$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it2/new.vcf.gz $padded_region
+$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it2/new.vcf.gz $PADDED_REGION
 $GRAPHTYPER index $GRAPH
 
 echo -n "|G" # Report genotyping iteration
 $GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH "." \
+  --threads=${GRAPHTYPER_THREADS}\
   --no_new_variants\
   --output=$TMPR/it3\
   --sams=$TMPR/bamlist > $GT_LOG
@@ -143,26 +126,66 @@ $GRAPHTYPER haplotypes $GRAPH \
 
 $TABIX $TMPR/it3/haps.vcf.gz
 
-# Clear graph
-rm --force ${GRAPH}
-rm -r --force ${GRAPH}_gti/
+# Clear graph and index
+rm -r --force ${GRAPH} ${GRAPH}_gti/
 
-# Genotyping-only iteration 2 (make final calls)
-$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it3/haps.vcf.gz $padded_region
+##
+# Iteration 4
+# Genotyping-only iteration 2 (cleans graph further)
+##
+$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it3/haps.vcf.gz $PADDED_REGION
 $GRAPHTYPER index $GRAPH
 echo -n "|G" # Report genotyping iteration
-$GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH \
+$GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH "." \
+  --threads=${GRAPHTYPER_THREADS}\
   --no_new_variants\
   --output=$TMPR/it4\
-  --sams=$TMPR/bamlist\
-  "."  > $GT_LOG
+  --sams=$TMPR/bamlist > $GT_LOG
 
+find $TMPR/it4/ -name "*.hap" | sort > $TMPR/haps4
+$GRAPHTYPER haplotypes $GRAPH \
+  --haplotypes $TMPR/haps4\
+  --output=$TMPR/it4/haps.vcf.gz\
+  --skip_breaking_down_extracted_haplotypes
 
-$GRAPHTYPER vcf_break_down $GRAPH $TMPR/it4/*_calls.vcf.gz \
-            --region=$unpadded_region \
-            --output=$TMP/results/${chrom}/${region_id}.vcf.gz
+$TABIX $TMPR/it4/haps.vcf.gz
+
+# Clear graph and index
+rm -r --force ${GRAPH} ${GRAPH}_gti/
+
+##
+# Iteration 5
+# Genotyping-only iteration 3 (make final small variant calls)
+##
+$GRAPHTYPER construct $GRAPH $GENOME --vcf=$TMPR/it4/haps.vcf.gz $PADDED_REGION
+$GRAPHTYPER index $GRAPH
+echo -n "|G" # Report genotyping iteration
+$GRAPHTYPER call $GRAPHTYPER_COMMON_OPTS $GRAPH "." \
+  --threads=${GRAPHTYPER_THREADS}\
+  --no_new_variants\
+  --output=$TMPR/it5\
+  --sams=$TMPR/bamlist > $GT_LOG
+
+# Create a VCF with all called variants and later join with SV calling
+find $TMPR/it5/ -name "*.hap" | sort > $TMPR/haps5
+$GRAPHTYPER haplotypes $GRAPH \
+  --haplotypes $TMPR/haps5\
+  --output=$TMP/haps/${chrom}/${region_id}.vcf.gz\
+  --skip_breaking_down_extracted_haplotypes\
+  --region=$UNPADDED_REGION
+$TABIX $TMP/haps/${chrom}/${region_id}.vcf.gz
+
+# No SV given, just break down the variants and call it a day
+$GRAPHTYPER vcf_break_down $GRAPH $TMPR/it5/*_calls.vcf.gz \
+          --region=$UNPADDED_REGION \
+          --output=$TMP/results/${chrom}/${region_id}.vcf.gz
 
 $TABIX $TMP/results/${chrom}/${region_id}.vcf.gz
+
+# Clean up
+if [[ $CLEAN_UP -ne 0 ]]; then
+  rm -r -f $TMPR
+fi
 
 echo -n "] "
 echo "Completed slice ${chrom}:${i}-$((i - 1 + SLICE_SIZE))"

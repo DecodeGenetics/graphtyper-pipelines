@@ -6,10 +6,11 @@ set -o pipefail
 ## (Required) Path to your indexed reference genome, e.g. /nfs/data/GRCh38.fa
 GENOME=
 
-## (Optional) Location of indexed bgzipped VCF file to use to initialize the graph structure.
-## Only needed if "INITIALIZE_GRAPH_WITH_VCF" is not 0. E.g. /nfs/data/dbSNP_common.vcf.gz
+## (Optional) Location of indexed bgzipped VCF file to use to initialize the graph structure. Should not include SVs (they go below)
 VCF=
 
+## (Optional) VCF with candicate SVs
+SV_VCF=
 
 # Program binaries #
 ## graphtyper binary, e.g. /usr/bin/graphtyper
@@ -35,56 +36,57 @@ TMP_FORMAT="/tmp/graphtyper_calling.XXXXXX"
 ## Top directory, you should probably not change this unless you know what you are doing
 TOP_DIR="$(realpath $(dirname ${BASH_SOURCE[0]}))"
 
-## Where the final results should go
-RESULTS="${TOP_DIR}/results"
-
 
 # Region/job parameters #
 ## (optional) If you want only to genotype a specific region, you can define its start position here.
 ## E.g. "chr1:6180000". Leave empty to call entire genome.
 REGION_START=
 
-## Size of the region each job will cover
-REGION_SIZE=1000000 # 1 mb
+## (optional) If you want to genotype a list of regions you can specify a file with them here.
+## The regions should be one per line and in the format: chr1:
+REGION_FILE=
+
+## Size of the region each job will cover. Should probably never be more than 1 MB
+REGION_SIZE=1000000 # 1 MB
 
 ## Number of threads each job will be allocated
-NUM_THREADS=4
+NUM_THREADS=2
+
+## Number of threads in SV calling
+NUM_THREADS_SV_CALLING=24
 
 ## Number of slices to run at the same time in each region/job.
 ## Because of I/O operations, you may want to use a value which is more than your total thread count to fully utilize your CPU power.
-NUM_SLICES_RUNNING=8
+NUM_SLICES_RUNNING=3
 
 ## Whether or not the temporary directories should be cleaned after genotyping
 CLEAN_UP=1
 
 ## Chromosomes to call
 CHROMOSOMES="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20\
- chr21 chr22 chrX"
+ chr21 chr22"
 
 
 # Call parameters #
-## Should Graphtyper initialize the graph using a VCF file (specified with the "VCF" variable)
-INITIALIZE_GRAPH_WITH_VCF=0
-
 ## Number of threads will use to genotype each slice
 ## 1 is recommended for most cases, but you can use more if you want to reduce the total time of each slice.
 GRAPHTYPER_THREADS=1
 
-## Number of samples to consider it to be a small sample size
-SMALL_SAMPLE_SIZE=2
-
-## Graphtyper call options for small sample sizes
-GRAPHTYPER_SMALL_SAMPLE_SIZE_OPTS="--threads=${GRAPHTYPER_THREADS} --minimum_variant_support=3 --minimum_variant_support_ratio=0.15"
-
 ## Graphtyper call options for large sample sizes
-GRAPHTYPER_POPULATION_OPTS="--threads=${GRAPHTYPER_THREADS} --minimum_variant_support=4 --minimum_variant_support_ratio=0.18"
+GRAPHTYPER_COMMON_OPTS="--minimum_variant_support=5 --minimum_variant_support_ratio=0.35"
 
 ## Number of bases in each slice.
 SLICE_SIZE=50000
 
-## Number of bases padded around slicess
+## Number of bases padded around slices
 PAD_SIZE=200
 
+## Extra padding applied in SV calling
+EXTRA_SV_PADDING=200000
+
+## Directory for raw SV genotyping. Does not output unless specified but probably not useful unless for debugging purposes
+SV_RESULTS_DIR_SUFFIX_SAMPLE1=0
+SV_RESULTS_DIR=sv_results
 
 # Read my_config.sh if available (note: that file should not be version controlled) #
 if [[ -f my_config.sh ]]
