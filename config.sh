@@ -57,7 +57,7 @@ NUM_THREADS_SV_CALLING=24
 
 ## Number of slices to run at the same time in each region/job.
 ## Because of I/O operations, you may want to use a value which is more than your total thread count to fully utilize your CPU power.
-NUM_SLICES_RUNNING=3
+NUM_SLICES_RUNNING=24
 
 ## Whether or not the temporary directories should be cleaned after genotyping
 CLEAN_UP=1
@@ -66,6 +66,8 @@ CLEAN_UP=1
 CHROMOSOMES="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20\
  chr21 chr22"
 
+## Set to 1 if there should only one genotyping iterations (only activated with a VCF file is given)
+GENOTYPE_ONLY=0
 
 # Call parameters #
 ## Number of threads will use to genotype each slice
@@ -102,7 +104,7 @@ if [[ ! -f $TABIX ]]; then echo "Tabix was not found (TABIX was set to '$TABIX')
 if [[ ! -f $SAMTOOLS ]]; then echo "SAMtools was not found (SAMTOOLS was set to '$SAMTOOLS')."; exit 1; fi
 if [[ ! -f $PARALLEL ]]; then echo "GNU parallel was not found (PARALLEL was set to '$PARALLEL')."; exit 1; fi
 if [[ ! -f $GENOME ]]; then echo "Reference genome was not found (GENOME was set to '$GENOME')."; exit 1; fi
-if [[ ! -f $VCF ]] && [[ $INITIALIZE_GRAPH_WITH_VCF -ne 0 ]]; then echo "VCF was not found (VCF was set to '$VCF')."; exit 1; fi
+if [[ ! -f $VCF ]]; then echo "VCF was not found (VCF was set to '$VCF')."; exit 1; fi
 
 # if the region size is not dividable by the slice size we need to make it larger
 rem=$((REGION_SIZE % SLICE_SIZE))

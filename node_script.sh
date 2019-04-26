@@ -49,7 +49,7 @@ ${UNPADDED_REGION}
 Date:
 $(date)"
 
-mkdir --parents $TMP/results/${chrom} $TMP/haps/${chrom} $TMP/bams
+mkdir --parents $TMP/results/${chrom} $TMP/haps/${chrom} $TMP/hap_calls/${chrom} $TMP/bams
 
 # Clean up temporary directory on failures
 trap cleanup 1 2 3 6 15
@@ -143,33 +143,24 @@ $PARALLEL --jobs=${NUM_SLICES_RUNNING} --halt=now,fail=1 bash $TMP/call_script.s
 # Get wall-clock time of genotyping
 genotyping_time=$(date +%s)
 
-# Make sure the results directory exists
-mkdir --parents results/${chrom}/ haps/${chrom}
-
 # Concatenate all VCF files
 $GRAPHTYPER vcf_concatenate $TMP/results/${chrom}/*.vcf.gz --no_sort --output=$TMP/final_small_variants.vcf.gz
 $TABIX $TMP/final_small_variants.vcf.gz
 $GRAPHTYPER vcf_concatenate $TMP/haps/${chrom}/*.vcf.gz --no_sort --output=$TMP/final_haps.vcf.gz
 $TABIX $TMP/final_haps.vcf.gz
+$GRAPHTYPER vcf_concatenate $TMP/hap_calls/${chrom}/*.vcf.gz --no_sort --output=$TMP/final_hap_calls.vcf.gz
+$TABIX $TMP/final_hap_calls.vcf.gz
 
+# Make sure the output directories exist
+mkdir --parents results/${chrom}/ haps/${chrom} hap_calls/${chrom}
+
+# Move results to output directories
 mv $TMP/final_small_variants.vcf.gz results/${chrom}/${region_id}.vcf.gz
 mv $TMP/final_small_variants.vcf.gz.tbi results/${chrom}/${region_id}.vcf.gz.tbi
 mv $TMP/final_haps.vcf.gz haps/${chrom}/${region_id}.vcf.gz
 mv $TMP/final_haps.vcf.gz.tbi haps/${chrom}/${region_id}.vcf.gz.tbi
-
-## Check if this region was already been genotyped
-#if [[ -f "results/${chrom}/${region_id}.vcf.gz" ]]
-#then
-#  echo "
-#WARNING: The output file already exists 'results/${chrom}/${region_id}.vcf.gz'.
-#         The old file will be moved to 'results/${chrom}/${region_id}.vcf.gz.bak'.
-#" 1>&2
-#  mv --force results/${chrom}/${region_id}.vcf.gz results/${chrom}/${region_id}.vcf.gz.bak
-#  mv --force results/${chrom}/${region_id}.vcf.gz.tbi results/${chrom}/${region_id}.vcf.gz.tbi.bak
-#fi
-#
-#mv results/${chrom}/${region_id}.vcf.gz.tmp results/${chrom}/${region_id}.vcf.gz
-#mv results/${chrom}/${region_id}.vcf.gz.tbi.tmp results/${chrom}/${region_id}.vcf.gz.tbi
+mv $TMP/final_hap_calls.vcf.gz hap_calls/${chrom}/${region_id}.vcf.gz
+mv $TMP/final_hap_calls.vcf.gz.tbi hap_calls/${chrom}/${region_id}.vcf.gz.tbi
 
 # Clean up
 if [[ $CLEAN_UP -eq 1 ]]; then
