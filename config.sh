@@ -86,9 +86,11 @@ PAD_SIZE=200
 ## Extra padding applied in SV calling
 EXTRA_SV_PADDING=200000
 
-## Directory for raw SV genotyping. Does not output unless specified but probably not useful unless for debugging purposes
-SV_RESULTS_DIR_SUFFIX_SAMPLE1=0
+## Results of SV genotyping
 SV_RESULTS_DIR=sv_results
+
+## Set to 1 if the first sample should be appended to the SV results directory name (useful if the bamlist was split into multiple pools)
+SV_RESULTS_DIR_SUFFIX_SAMPLE1=0
 
 # Read my_config.sh if available (note: that file should not be version controlled) #
 if [[ -f my_config.sh ]]
@@ -104,7 +106,7 @@ if [[ ! -f $TABIX ]]; then echo "Tabix was not found (TABIX was set to '$TABIX')
 if [[ ! -f $SAMTOOLS ]]; then echo "SAMtools was not found (SAMTOOLS was set to '$SAMTOOLS')."; exit 1; fi
 if [[ ! -f $PARALLEL ]]; then echo "GNU parallel was not found (PARALLEL was set to '$PARALLEL')."; exit 1; fi
 if [[ ! -f $GENOME ]]; then echo "Reference genome was not found (GENOME was set to '$GENOME')."; exit 1; fi
-if [[ ! -f $VCF ]]; then echo "VCF was not found (VCF was set to '$VCF')."; exit 1; fi
+if [[ ! -z $VCF ]] && [[ ! -f $VCF ]]; then echo "VCF was not found (VCF was set to '$VCF')."; exit 1; fi
 
 # if the region size is not dividable by the slice size we need to make it larger
 rem=$((REGION_SIZE % SLICE_SIZE))

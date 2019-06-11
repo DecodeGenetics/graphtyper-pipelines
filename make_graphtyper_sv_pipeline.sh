@@ -32,6 +32,7 @@ do
   end=$((start - 1 + REGION_SIZE))
   CHROM_SIZE=`grep -w "^${chrom}" $GENOME.fai | cut -f2`
   end=$((end>CHROM_SIZE?CHROM_SIZE:end)) # Never expand end further than the total length of the chromosome
+  skip=0
 
   while [[ $start -lt $CHROM_SIZE ]]
   do
@@ -39,8 +40,10 @@ do
 
     # Only add this region if the output file is missing
     if [[ ! -f "haps/${chrom}/${region_id}.vcf.gz" ]]; then
-      echo "ERROR: Missing input file 'haps/${chrom}/${region_id}.vcf.gz'. Aborting." >&2
-      exit 1
+      echo "WARNING: Skipping adding SNP/indel haplotypes on chromosome ${chrom} due to missing input file 'haps/${chrom}/${region_id}.vcf.gz'." >&2
+      skip=1
+      break
+      #exit 1
       #echo "set -e; set -o pipefail; ./node_script.sh $CONFIG $bam ${chrom}:${start}"
     fi
 
@@ -49,6 +52,8 @@ do
     end=$((start - 1 + REGION_SIZE))
     end=$((end>CHROM_SIZE?CHROM_SIZE:end)) # Never expand end further than the total length of the chromosome
   done > /tmp/${chrom}_filelist
+
+  if [[ $skip -eq 1 ]]; then continue; fi
 
   $VT cat -s -L /tmp/${chrom}_filelist -o haps/${chrom}.vcf.gz
   $TABIX haps/${chrom}.vcf.gz
@@ -70,7 +75,7 @@ do
 
     # Only add this region if the output file is missing
     if [[ ! -f "sv_results/${chrom}/${region_id}.vcf.gz" ]]; then
-      echo "set -e; set -o pipefail; ./sv_node_script.sh $CONFIG $bam ${chrom}:${start}"
+      echo "./sv_node_script.sh $CONFIG $bam ${chrom}:${start}"
     fi
 
     start=$((end + 1))
