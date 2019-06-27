@@ -103,7 +103,7 @@ then
   cat <($VT view -H $SV_VCF | head -n -1) <($VT view -H haps/${chrom}.vcf.gz | grep -P "^##INFO") <($VT view -H $SV_VCF | tail -n 1) > $TMP/vcf_header
   zcat $SV_VCF haps/${chrom}.vcf.gz | awk -v chrom=${chrom} -v start=$start -v end=$end 'substr($1,1,1) != "#" && $1 == chrom && $2 >= start && $2 <= end' | sort -k2,2n | cat $TMP/vcf_header - > $TMP/input_with_svs.vcf
 else
-  zcat $SV_VCF | head -n 10000 | grep "^#" > $TMP/vcf_header
+  zcat $SV_VCF | grep "^#" > $TMP/vcf_header
   zcat $SV_VCF | awk -v chrom=${chrom} -v start=$start -v end=$end 'substr($1,1,1) != "#" && $1 == chrom && $2 >= start && $2 <= end' | sort -k2,2n | cat $TMP/vcf_header - > $TMP/input_with_svs.vcf
 fi
 
