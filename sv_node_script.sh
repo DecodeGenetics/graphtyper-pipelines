@@ -98,8 +98,15 @@ echo `date`" INFO: Bamlist size is ${bamlist_size}"
 mkdir --parents ${SV_RESULTS_DIR}/${chrom}/
 
 # SV graph construction
-cat <($VT view -H $SV_VCF | head -n -1) <($VT view -H haps/${chrom}.vcf.gz | grep -P "^##INFO") <($VT view -H $SV_VCF | tail -n 1) > $TMP/vcf_header
-zcat $SV_VCF haps/${chrom}.vcf.gz | awk -v chrom=${chrom} -v start=$start -v end=$end 'substr($1,1,1) != "#" && $1 == chrom && $2 >= start && $2 <= end' | sort -k2,2n | cat $TMP/vcf_header - > $TMP/input_with_svs.vcf
+if [[ -f haps/${chrom}.vcf.gz ]]
+then
+  cat <($VT view -H $SV_VCF | head -n -1) <($VT view -H haps/${chrom}.vcf.gz | grep -P "^##INFO") <($VT view -H $SV_VCF | tail -n 1) > $TMP/vcf_header
+  zcat $SV_VCF haps/${chrom}.vcf.gz | awk -v chrom=${chrom} -v start=$start -v end=$end 'substr($1,1,1) != "#" && $1 == chrom && $2 >= start && $2 <= end' | sort -k2,2n | cat $TMP/vcf_header - > $TMP/input_with_svs.vcf
+else
+  zcat $SV_VCF | head -n 10000 | grep "^#" > $TMP/vcf_header
+  zcat $SV_VCF | awk -v chrom=${chrom} -v start=$start -v end=$end 'substr($1,1,1) != "#" && $1 == chrom && $2 >= start && $2 <= end' | sort -k2,2n | cat $TMP/vcf_header - > $TMP/input_with_svs.vcf
+fi
+
 cat $TMP/input_with_svs.vcf | bgzip -c > $TMP/input_with_svs.vcf.gz
 $TABIX $TMP/input_with_svs.vcf.gz
 GRAPH="$TMP/input_with_svs"
