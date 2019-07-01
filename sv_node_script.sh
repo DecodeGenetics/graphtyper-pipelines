@@ -145,11 +145,16 @@ fi
 
 # Merge VCF files
 find $TMP/sv_results/ -maxdepth 1 -name "*_calls.vcf.gz" -type f | sort > $TMP/all_calls
-#split --lines=1000 $TMP/all_calls $TMP/part_
-#find $TMP/ -maxdepth 1 -name "part_*" -type f | sort > $TMP/all_parts
-#$PARALLEL --halt=now,fail=1 --jobs=1 -a $TMP/all_parts "$GRAPHTYPER vcf_merge --file_list={1} --output={1}.vcf.gz"
-#find $TMP/ -maxdepth 1 -name "part_*.vcf.gz" -type f | sort > $TMP/all_vcfs
-$GRAPHTYPER vcf_merge --file_list=$TMP/all_calls --output=$TMP/graphtyper_calls_merged.vcf.gz
+
+if [[ $(cat $TMP/all_calls | wc -l) -gt 3000 ]]
+then
+  split --lines=1000 $TMP/all_calls $TMP/part_
+  find $TMP/ -maxdepth 1 -name "part_*" -type f | sort > $TMP/all_parts
+  $PARALLEL --halt=now,fail=1 --jobs=1 -a $TMP/all_parts "$GRAPHTYPER vcf_merge --file_list={1} --output={1}.vcf.gz"
+  find $TMP/ -maxdepth 1 -name "part_*.vcf.gz" -type f | sort > $TMP/all_vcfs
+else
+  $GRAPHTYPER vcf_merge --file_list=$TMP/all_calls --output=$TMP/graphtyper_calls_merged.vcf.gz
+fi
 
 # Remove variants outside of the genotyping region
 zcat $TMP/graphtyper_calls_merged.vcf.gz | awk -v start=$start -v end=$end 'substr($1,1,1) == "#" || ($2 >= start && $2 <= end)' | bgzip -c > $TMP/graphtyper_calls_merged_in_region.vcf.gz
@@ -167,7 +172,7 @@ end_time=$(date +%s)
 
 echo "
 Graphtyper finished SV genotyping the region successfully. Final results are at:
-${SV_RESULTS_DIR}/${chrom}/${region_id}.vcf.gz
+${SV_RESULTS_DIR}/${chrom}/${region_id}.raw.vcf.gz
 
 Total time (seconds):
 $((end_time - start_time))
