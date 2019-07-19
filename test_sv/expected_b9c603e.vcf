@@ -1,0 +1,89 @@
+##fileformat=VCFv4.2
+##fileDate=20190719
+##source=Graphtyper
+##graphtyperVersion=2.0
+##graphtyperGitBranch=master
+##graphtyperSHA1=b9c603e827a4f7da65cde142dc9c8205b7d0546e
+##contig=<ID=chrUn,length=1001>
+##contig=<ID=chr20,length=100000>
+##INFO=<ID=ABHet,Number=1,Type=Float,Description="Allele Balance for heterozygouscalls (read count of call2/(call1+call2)) where the called genotype is call1/call2.  -1 if no heterozygous calls.">
+##INFO=<ID=ABHom,Number=1,Type=Float,Description="Allele Balance for homozygous calls(read count of A/(A+O)) where A is the called allele and O is anything else. -1 if no homozygous calls.">
+##INFO=<ID=ABHetMulti,Number=A,Type=Float,Description="List of Allele Balance values formultiallelic heterozygous calls (alt/(ref+alt)). Each value corresponds to an alt in the same order as they appear. -1 if not available.">
+##INFO=<ID=ABHomMulti,Number=R,Type=Float,Description="List of Allele Balance values formultiallelic homozygous calls (A/(A+0)) where A is the called allele and O is anything else. Each value corresponds to a ref or alt in the same order as they appear. -1 if not available.">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Number of alternate alleles in called genotypes.">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Number of alleles in called genotypes.">
+##INFO=<ID=CR,Number=1,Type=Integer,Description="Number of clipped reads by Graphtyper.">
+##INFO=<ID=CRAligner,Number=R,Type=Integer,Description="Number of clipped reads by the global read aligner.">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of an SV.">
+##INFO=<ID=GX,Number=1,Type=Integer,Description="Graph complexity, 10*log10(#paths around the variant).">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical homology at event breakpoints.">
+##INFO=<ID=INV3,Number=0,Type=Flag,Description="Inversion breakends open 3' of reported location">
+##INFO=<ID=INV5,Number=0,Type=Flag,Description="Inversion breakends open 5' of reported location">
+##INFO=<ID=LEFT_SVINSSEQ,Number=.,Type=String,Description="Known left side of insertion for an insertion of unknown length.">
+##INFO=<ID=MaxAAS,Number=A,Type=Integer,Description="Maximum alternative allele support per alt. allele.">
+##INFO=<ID=MaxAASR,Number=A,Type=Float,Description="Maximum alternative allele support ratio per alt. allele.">
+##INFO=<ID=MaxAltPP,Number=1,Type=Integer,Description="Maximum number of proper pairs support the alternative allele.">
+##INFO=<ID=MQ,Number=1,Type=Integer,Description="Root-mean-square mapping quality.">
+##INFO=<ID=MQ0,Number=1,Type=Integer,Description="Number of reads with MQ=0.">
+##INFO=<ID=MQperAllele,Number=R,Type=Integer,Description="Mapping quality of reads aligned to each allele.">
+##INFO=<ID=NCLUSTERS,Number=1,Type=Integer,Description="Number of SV candidates in cluster, as reported by popSVar.">
+##INFO=<ID=NGT,Number=3,Type=Integer,Description="Number of REF/REF, REF/ALT and ALT/ALTgenotypes, respectively.">
+##INFO=<ID=NHet,Number=1,Type=Integer,Description="Number of heterozygous genotype calls.">
+##INFO=<ID=NHom,Number=1,Type=Integer,Description="Number of homozygous genotype calls.">
+##INFO=<ID=NRP,Number=0,Type=Flag,Description="Set if no Non-Reference has PASS.">
+##INFO=<ID=NUM_MERGED_SVS,Number=1,Type=Integer,Description="Number of SVs merged.">
+##INFO=<ID=OLD_VARIANT_ID,Number=1,Type=String,Description="Variant ID from a VCF (SVs only).">
+##INFO=<ID=ORSTART,Number=1,Type=Integer,Description="Start coordinate of sequence origin.">
+##INFO=<ID=OREND,Number=1,Type=Integer,Description="End coordinate of sequence origin.">
+##INFO=<ID=QD,Number=1,Type=Float,Description="QUAL divided by NonReferenceSeqDepth.">
+##INFO=<ID=PASS_AC,Number=A,Type=Integer,Description="Number of alternate alleles in called genotyped that have FT = PASS.">
+##INFO=<ID=PASS_AN,Number=1,Type=Integer,Description="Number of genotype calls that haveFT = PASS.">
+##INFO=<ID=PASS_ratio,Number=1,Type=Float,Description="Ratio of genotype calls that haveFT = PASS.">
+##INFO=<ID=PS,Number=1,Type=Integer,Description="Unique ID of the phase set this variantis a member of. If the calls are unphased, it is used to represent which haplotype set the variant is a member of.">
+##INFO=<ID=RACount,Number=R,Type=Integer,Description="Number of realigned reads which were uniquely aligned to this allele.">
+##INFO=<ID=RADist,Number=R,Type=Integer,Description="Total realignment distance of all reads per allele. Realignment distance = abs((Original aligned begin position) - (New aligned begin position)).">
+##INFO=<ID=RAMeanDist,Number=R,Type=Integer,Description="Mean realignment distance per allele.">
+##INFO=<ID=RefLen,Number=1,Type=Integer,Description="Length of the reference allele.">
+##INFO=<ID=RELATED_SV_ID,Number=1,Type=Integer,Description="GraphTyper ID of a related SV.">
+##INFO=<ID=RIGHT_SVINSSEQ,Number=.,Type=String,Description="Known right side of insertion for an insertion of unknown length.">
+##INFO=<ID=SB,Number=1,Type=Float,Description="Strand bias (F/(F+R)) where F and R are forward and reverse strands, respectively. -1 if not available.">
+##INFO=<ID=SBF,Number=R,Type=Integer,Description="Number of forward stranded reads per allele.">
+##INFO=<ID=SBF1,Number=R,Type=Integer,Description="Number of first forward stranded reads per allele.">
+##INFO=<ID=SBF2,Number=R,Type=Integer,Description="Number of second forward stranded reads per allele.">
+##INFO=<ID=SBR,Number=R,Type=Integer,Description="Number of reverse stranded reads per allele.">
+##INFO=<ID=SBR1,Number=R,Type=Integer,Description="Number of first reverse stranded reads per allele.">
+##INFO=<ID=SBR2,Number=R,Type=Integer,Description="Number of second reverse stranded reads per allele.">
+##INFO=<ID=SEQ,Number=1,Type=String,Description="Inserted sequence at variant site.">
+##INFO=<ID=SeqDepth,Number=1,Type=Integer,Description="Total accumulated sequencing depth over all the samples.">
+##INFO=<ID=SV_ID,Number=1,Type=Integer,Description="GraphTyper's ID on SV">
+##INFO=<ID=SVINSSEQ,Number=.,Type=String,Description="Sequence of insertion">
+##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Length of structural variant in bp. Negative lengths indicate a deletion.">
+##INFO=<ID=SVMODEL,Number=1,Type=String,Description="Model used for SV genotyping.">
+##INFO=<ID=SVSIZE,Number=1,Type=Integer,Description="Size of structural variant in bp. Always 50 or more.">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
+##INFO=<ID=Unaligned,Number=1,Type=Integer,Description="Number of previously unaligned reads that got re-aligned.">
+##INFO=<ID=VarType,Number=1,Type=String,Description="First letter is program identifier,the second letter is variant type.">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="GenoType call.">
+##FORMAT=<ID=FT,Number=1,Type=String,Description="Filter. PASS or FAILN where N is a number.">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed.">
+##FORMAT=<ID=MD,Number=1,Type=Integer,Description="Read depth of multiple alleles.">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth.">
+##FORMAT=<ID=RA,Number=2,Type=Integer,Description="Total read depth of the reference allele and all alternative alleles, including reads that support more than one allele.">
+##FORMAT=<ID=PP,Number=1,Type=Integer,Description="Number of reads that support non-reference haplotype that are proper pairs.">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality.">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="PHRED-scaled genotype likelihoods.">
+##FILTER=<ID=ABHet,Description="Allele balance of heterozygous carriers is below 20%.">
+##FILTER=<ID=ABHom,Description="Allele balance of homozygous carriers is below 90%.">
+##FILTER=<ID=QD,Description="QD (quality by depth) is below 4.0.">
+##FILTER=<ID=QUAL,Description="QUAL score is less than 20.">
+##FILTER=<ID=Pratio,Description="Ratio of PASSed calls was too low.">
+##FILTER=<ID=NRP,Description="No Non-Reference genotype with PASS.">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMP1	SAMP2	SAMP3	SAMP4
+chr20	1000	chr20:1000:DG	N	<DEL:SVSIZE=10000:AGGREGATED>	765	PASS	ABHet=0.5446;ABHom=0.96;AC=4;AN=8;CR=0;CRAligner=0,0;END=11000;GX=3;MQ=60;MQ0=0;MQperAllele=60,76;MaxAAS=46;MaxAASR=1;MaxAltPP=32;NCLUSTERS=10;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=0;QD=25.500000;RACount=107,119;RADist=0,540000;RefLen=1;SB=0.5133;SBF=52,64;SBF1=27,26;SBF2=25,38;SBR=55,55;SBR1=26,31;SBR2=29,24;SVLEN=10000;SVMODEL=AGGREGATED;SVSIZE=10000;SVTYPE=DEL;SV_ID=0;SeqDepth=221;Unaligned=0;VarType=DG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:50,4:0:54:0,0:0:171:0,171,255	0/1:PASS:26,26:2:54:28,28:26:255:255,0,255	1/1:PASS:0,46:0:46:0,0:0:207:255,207,0	0/1:PASS:25,35:7:67:32,42:32:255:255,0,255
+chr20	11502	chr20:11502:FG	N	<INS:SVSIZE=78:AGGREGATED>	765	PASS	ABHet=0.4382;ABHom=1;AC=4;AN=8;CR=0;CRAligner=0,0;END=11580;GX=5;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=60;MaxAASR=1;MaxAltPP=54;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=1;QD=25.500000;RACount=112,52;RADist=0,20620;RELATED_SV_ID=2;RefLen=1;SB=0.4695;SBF=50,27;SBF1=31,15;SBF2=19,12;SBR=62,25;SBR1=33,15;SBR2=29,10;SEQ=CAATGACAAAATCGTAAATTTCAAGAAATGCTAGGAAAAAACAGATACAGATAAGAAAAAATTTGAAATTCTGAACAA;SVLEN=78;SVMODEL=AGGREGATED;SVSIZE=78;SVTYPE=INS;SV_ID=1;SeqDepth=216;Unaligned=0;VarType=FG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:62,0:0:62:62,0:0:186:0,186,255	0/1:PASS:26,18:0:44:26,18:16:255:255,0,255	1/1:PASS:0,60:2:62:2,62:54:180:255,180,0	0/1:PASS:24,21:3:48:27,24:20:255:255,0,255
+chr20	12000	chr20:12000:DG	N	<DEL:SVSIZE=50:AGGREGATED>	765	PASS	ABHet=0.5664;ABHom=1;AC=4;AN=8;CR=0;CRAligner=0,0;END=12050;GX=3;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=78;MaxAASR=1;MaxAltPP=68;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=2;QD=25.500000;RACount=103,142;RADist=0,2500;RefLen=1;SB=0.5347;SBF=59,72;SBF1=25,27;SBF2=34,45;SBR=44,70;SBR1=22,29;SBR2=22,41;SVLEN=50;SVMODEL=AGGREGATED;SVSIZE=50;SVTYPE=DEL;SV_ID=3;SeqDepth=247;Unaligned=0;VarType=DG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:54,0:0:54:54,0:0:163:0,163,255	0/1:PASS:28,31:1:60:29,32:30:255:255,0,255	1/1:PASS:0,78:0:78:0,78:68:235:255,235,0	0/1:PASS:21,33:1:55:22,34:32:255:255,0,255
+chr20	23000	chr20:23000:TG	N	<INV:SVSIZE=100:AGGREGATED>	765	PASS	ABHet=0.4257;ABHom=1;AC=4;AN=8;CR=0;CRAligner=0,0;END=23100;GX=3;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=50;MaxAASR=1;MaxAltPP=46;NGT=1,2,1;NHet=2;NHom=2;NUM_MERGED_SVS=100;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=4;QD=25.500000;RACount=120,81;RADist=0,14944;RELATED_SV_ID=4;RefLen=1;SB=0.4925;SBF=56,43;SBF1=21,15;SBF2=35,28;SBR=64,38;SBR1=32,23;SBR2=32,15;SVLEN=100;SVMODEL=AGGREGATED;SVSIZE=100;SVTYPE=INV;SV_ID=5;SeqDepth=223;Unaligned=0;VarType=TG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:64,0:2:66:66,2:0:193:0,193,255	0/1:PASS:21,16:1:38:22,17:14:255:255,0,255	1/1:PASS:0,50:2:52:2,52:46:151:255,151,0	0/1:PASS:37,27:3:67:40,30:22:255:255,0,255
+chr20	26000	chr20:26000:TG	N	<INV:SVSIZE=1000:AGGREGATED>	765	PASS	ABHet=0.5361;ABHom=1;AC=4;AN=8;CR=0;CRAligner=0,0;END=27000;GX=3;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=42;MaxAASR=1;MaxAltPP=30;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=6;QD=25.500000;RACount=91,94;RADist=0,58448;RELATED_SV_ID=6;RefLen=1;SB=0.5405;SBF=40,60;SBF1=18,21;SBF2=22,39;SBR=51,34;SBR1=33,17;SBR2=18,17;SVLEN=1000;SVMODEL=AGGREGATED;SVSIZE=1000;SVTYPE=INV;SV_ID=7;SeqDepth=186;Unaligned=0;VarType=TG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:46,0:0:46:46,0:0:138:0,138,255	0/1:PASS:22,26:0:48:22,26:16:255:255,0,255	1/1:PASS:0,42:0:42:0,42:30:126:255,126,0	0/1:PASS:23,26:1:50:24,27:18:255:255,0,255
+chr20	45000	chr20:45000:UG	N	<DUP:SVSIZE=10001:AGGREGATED>	744	PASS	ABHet=0.53;ABHom=0.9464;AC=4;AN=8;CR=0;CRAligner=0,0;END=55001;GX=3;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=50;MaxAASR=0.8929;MaxAltPP=0;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=8;QD=24.800000;RACount=209,123;RADist=0,726324;RELATED_SV_ID=9;RefLen=1;SB=0.4699;SBF=94,62;SBF1=49,21;SBF2=45,41;SBR=115,61;SBR1=45,34;SBR2=70,27;SVLEN=10001;SVMODEL=AGGREGATED;SVSIZE=10001;SVTYPE=DUP;SV_ID=8;SeqDepth=212;Unaligned=0;VarType=UG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:56,0:0:56:0,0:0:252:0,252,255	0/1:PASS:26,26:0:52:0,0:0:234:234,0,234	1/1:PASS:6,50:0:56:0,0:0:144:255,144,0	0/1:PASS:21,27:0:48:0,0:0:162:255,0,162
+chr20	63000	chr20:63000:FG	N	<INS:SVSIZE=163+:AGGREGATED>	702	PASS	ABHet=0.3564;ABHom=1;AC=4;AN=8;CR=0;CRAligner=0,0;END=63000;GX=5;LEFT_SVINSSEQ=GTCTGGAACTCTATAGATAACACGTAAGGTCAGGGGTTGAATTTTAACTACCAGGCCCGAAATGTCCGTGAATTTTAACA;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=28;MaxAASR=1;MaxAltPP=22;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=9;QD=23.400000;RACount=111,56;RADist=0,0;RELATED_SV_ID=11;RIGHT_SVINSSEQ=CTGTGAGGAGTGGTCTCCTCTCTCAGTGTAAACATGACACAAGTGGTGAGGTTATTCTTTCAACTTCTACCTTTCTTTCAACT;RefLen=1;SB=0.5629;SBF=68,26;SBF1=26,16;SBF2=42,10;SBR=43,30;SBR1=15,15;SBR2=28,15;SVMODEL=AGGREGATED;SVTYPE=INS;SV_ID=10;SeqDepth=186;Unaligned=0;VarType=FG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:46,0:0:46:46,0:0:138:0,138,255	0/1:PASS:26,19:1:46:27,20:18:255:255,0,255	1/1:PASS:0,28:6:34:6,34:22:84:255,84,0	0/1:PASS:39,17:4:60:43,21:13:192:192,0,255
+chr20	75000	chr20:75000:DG	N	<DEL:SVSIZE=495:AGGREGATED>	765	PASS	ABHet=0.5517;ABHom=1;AC=4;AN=8;CR=0;CRAligner=0,0;END=75500;GX=3;MQ=60;MQ0=0;MQperAllele=60,60;MaxAAS=58;MaxAASR=1;MaxAltPP=54;NGT=1,2,1;NHet=2;NHom=2;PASS_AC=4;PASS_AN=8;PASS_ratio=1.000000;PS=10;QD=25.500000;RACount=111,106;RADist=0,25740;RefLen=1;SB=0.5161;SBF=52,60;SBF1=27,30;SBF2=25,30;SBR=59,46;SBR1=32,22;SBR2=27,24;SEQ=GGGAG;SVLEN=495;SVMODEL=AGGREGATED;SVSIZE=495;SVTYPE=DEL;SV_ID=12;SeqDepth=220;Unaligned=0;VarType=DG	GT:FT:AD:MD:DP:RA:PP:GQ:PL	0/0:PASS:72,0:0:72:72,0:0:217:0,217,255	0/1:PASS:17,25:0:42:17,25:21:255:255,0,255	1/1:PASS:0,58:2:60:2,60:54:175:255,175,0	0/1:PASS:22,23:1:46:23,24:20:255:255,0,255
