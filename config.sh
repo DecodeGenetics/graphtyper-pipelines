@@ -13,19 +13,19 @@ VCF=
 SV_VCF=
 
 # Program binaries #
-## graphtyper binary, e.g. /usr/bin/graphtyper
+## (Required) graphtyper binary, e.g. /usr/bin/graphtyper
 GRAPHTYPER=$(type -P graphtyper)
 
-## vt binary (https://github.com/atks/vt), e.g. /usr/bin/vt
-VT=$(type -P vt)
+## (Optional in SNP/indel calling, required in SV calling) bamShrink binary
+BAMSHRINK=$(type -P bamShrink)
 
-## tabix binary, e.g. /usr/bin/tabix
+## (Required) tabix binary, e.g. /usr/bin/tabix
 TABIX=$(type -P tabix)
 
-## samtools binary, e.g. /usr/bin/samtools
+## (Required) samtools binary, e.g. /usr/bin/samtools
 SAMTOOLS=$(type -P samtools)
 
-## GNU parallel binary, e.g. /usr/bin/parallel
+## (Required) GNU parallel binary, e.g. /usr/bin/parallel
 PARALLEL=$(type -P parallel)
 
 
@@ -57,7 +57,7 @@ NUM_THREADS_SV_CALLING=24
 
 ## Number of slices to run at the same time in each region/job.
 ## Because of I/O operations, you may want to use a value which is more than your total thread count to fully utilize your CPU power.
-NUM_SLICES_RUNNING=24
+NUM_SLICES_RUNNING=3
 
 ## Whether or not the temporary directories should be cleaned after genotyping
 CLEAN_UP=1

@@ -3,6 +3,7 @@
 set -e
 set -o pipefail
 
+
 bam=$1
 CONFIG=$2
 
@@ -30,7 +31,7 @@ elif [[ ! -z $REGION_FILE ]] && [[ -f $REGION_FILE ]]
 then
   for region in `cat $REGION_FILE`
   do
-    echo "set -e; set -o pipefail; ./node_script.sh $CONFIG $bam $region"
+    echo "set -e; ./node_script.sh $CONFIG $bam $region"
   done
 else
   for chrom in $CHROMOSOMES
