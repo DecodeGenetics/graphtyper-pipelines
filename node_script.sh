@@ -88,8 +88,6 @@ cut -f1 $TMP/global_bamlist | awk -v FS=/ -v path="$TMP/bams" '{print path"/"$NF
 # Copy BAM files to a local directory
 if [[ ! -z $BAMSHRINK ]]
 then
-  echo ${chrom}$'\t'${start}$'\t'${end} > $TMP/region_file
-
   while IFS=$'\t' read bam cov
   do
     if [[ -z $cov ]]; then
@@ -102,12 +100,15 @@ then
   cut -f1 $TMP/global_bamlist > $TMP/global_bamlist2
   mv --force $TMP/global_bamlist2 $TMP/global_bamlist
 
-  $PARALLEL --halt=now,fail=1 --jobs=${NUM_THREADS} --xapply "${BAMSHRINK} {2} {1} 1000 Y 45 {3} {2}.bai $TMP/region_file"\
+  $PARALLEL --halt=now,fail=1 --jobs=${NUM_THREADS} --xapply "${BAMSHRINK} --output={1} --avg-cov-by-readlen={3} --interval=${chrom}:${start}-${end} {2}"\
     :::: $TMP/local_bamlist \
     :::: $TMP/global_bamlist \
     :::: $TMP/global_coverage > $TMP/bamshrink_log_out 2> $TMP/bamshrink_log_err
 else
-  $PARALLEL -a $TMP/local_bamlist -a <(cut -f1 $TMP/global_bamlist) --halt=now,fail=1 --jobs=${NUM_THREADS} --xapply "${SAMTOOLS} view -o {1} -b {2} ${chrom}:${start_padded}-${end_padded}" > $TMP/samtools_log_out 2> $TMP/samtools_log_err
+  $PARALLEL -a $TMP/local_bamlist -a <(cut -f1 $TMP/global_bamlist) --halt=now,fail=1 --jobs=${NUM_THREADS} --xapply \
+    "${SAMTOOLS} view -o {1} -b {2} ${chrom}:${start_padded}-${end_padded}" \
+    > $TMP/samtools_log_out \
+    2> $TMP/samtools_log_err
 fi
 
 echo "
@@ -125,7 +126,8 @@ while [[ $start -lt $end ]]
 do
   echo "${chrom}:${start}"
   start=$((start + SLICE_SIZE))
-done | $PARALLEL --jobs=${NUM_SLICES_RUNNING} --halt=now,fail=1 bash $TMP/call_script.sh $TMP/config.sh $TMP/local_bamlist
+done | $PARALLEL --jobs=${NUM_SLICES_RUNNING} --halt=now,fail=1 \
+  bash $TMP/call_script.sh $TMP/config.sh $TMP/local_bamlist
 
 # Get wall-clock time of genotyping
 genotyping_time=$(date +%s)

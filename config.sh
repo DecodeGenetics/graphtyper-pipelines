@@ -50,21 +50,20 @@ REGION_FILE=
 REGION_SIZE=1000000 # 1 MB
 
 ## Number of threads each job will be allocated
-NUM_THREADS=2
+NUM_THREADS=1
 
 ## Number of threads in SV calling
 NUM_THREADS_SV_CALLING=24
 
 ## Number of slices to run at the same time in each region/job.
-## Because of I/O operations, you may want to use a value which is more than your total thread count to fully utilize your CPU power.
-NUM_SLICES_RUNNING=3
+NUM_SLICES_RUNNING=1
 
 ## Whether or not the temporary directories should be cleaned after genotyping
 CLEAN_UP=1
 
 ## Chromosomes to call
-CHROMOSOMES="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20\
- chr21 chr22"
+CHROMOSOMES="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 \
+chr19 chr20 chr21 chr22"
 
 ## Set to 1 if there should only one genotyping iterations (only activated with a VCF file is given)
 GENOTYPE_ONLY=0
@@ -76,6 +75,9 @@ GRAPHTYPER_THREADS=1
 
 ## Graphtyper call options for large sample sizes
 GRAPHTYPER_COMMON_OPTS="--minimum_variant_support=5 --minimum_variant_support_ratio=0.35"
+
+## Graphtyper maximum allowed number of files open at the same time
+MAX_FILES_OPEN=9800
 
 ## Number of bases in each slice.
 SLICE_SIZE=50000
@@ -89,7 +91,7 @@ EXTRA_SV_PADDING=200000
 ## Results of SV genotyping
 SV_RESULTS_DIR=sv_results
 
-## Set to 1 if the first sample should be appended to the SV results directory name (useful if the bamlist was split into multiple pools)
+## Set to 1 if the first sample should be appended to the SV results directory name
 SV_RESULTS_DIR_SUFFIX_SAMPLE1=0
 
 # Read my_config.sh if available (note: that file should not be version controlled) #
