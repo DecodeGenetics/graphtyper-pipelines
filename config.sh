@@ -1,6 +1,6 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+
 set -e
-set -o pipefail
 
 # Files #
 ## (Required) Path to your indexed reference genome, e.g. /nfs/data/GRCh38.fa
@@ -14,19 +14,19 @@ SV_VCF=
 
 # Program binaries #
 ## (Required) graphtyper binary, e.g. /usr/bin/graphtyper
-GRAPHTYPER=$(type -P graphtyper)
+GRAPHTYPER=$(type -P graphtyper || true)
 
 ## (Optional in SNP/indel calling, required in SV calling) bamShrink binary
-BAMSHRINK=$(type -P bamShrink)
+BAMSHRINK=$(type -P bamShrink || true)
 
 ## (Required) tabix binary, e.g. /usr/bin/tabix
-TABIX=$(type -P tabix)
+TABIX=$(type -P tabix || true)
 
 ## (Required) samtools binary, e.g. /usr/bin/samtools
-SAMTOOLS=$(type -P samtools)
+SAMTOOLS=$(type -P samtools || true)
 
 ## (Required) GNU parallel binary, e.g. /usr/bin/parallel
-PARALLEL=$(type -P parallel)
+PARALLEL=$(type -P parallel || true)
 
 
 # Directories #
@@ -103,7 +103,6 @@ fi
 
 # Check for problems#
 if [[ ! -f $GRAPHTYPER ]]; then echo "Graphtyper was not found (GRAPHTYPER was to '$GRAPHTYPER')."; exit 1; fi
-if [[ ! -f $VT ]]; then echo "VT was not found (VT was set to '$VT')."; exit 1; fi
 if [[ ! -f $TABIX ]]; then echo "Tabix was not found (TABIX was set to '$TABIX')."; exit 1; fi
 if [[ ! -f $SAMTOOLS ]]; then echo "SAMtools was not found (SAMTOOLS was set to '$SAMTOOLS')."; exit 1; fi
 if [[ ! -f $PARALLEL ]]; then echo "GNU parallel was not found (PARALLEL was set to '$PARALLEL')."; exit 1; fi

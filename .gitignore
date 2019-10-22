@@ -1,5 +1,5 @@
 /my_config.sh
-/results/
+/results*/
 /rp/
 /run
 /sv_results/
@@ -21,3 +21,6 @@
 /*.rp*
 /graphtyper/
 /gt/
+/bams*/
+/commands
+/genome/
