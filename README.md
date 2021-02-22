@@ -1,5 +1,7 @@
+***NOTICE: These pipelines scripts have been deprecated. Use "graphtyper genotype" or "graphtyper genotype_sv" instead!***
+
 # Graphtyper pipelines
-This repository has the recommended pipeline scripts to use for Graphtyper. The scripts depends on the following tools:
+This repository has pipeline scripts for **older** versions of Graphtyper (pre v2.1). They are only here for reproducability of older genotyping runs and since a few publications have references to them. The scripts depends on the following tools:
  - Graphtyper
  - GNU parallel
  - samtools
